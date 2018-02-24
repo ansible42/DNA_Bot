@@ -8,29 +8,30 @@ from keras.layers.core import Dense, Activation, Dropout
 from keras.layers.recurrent import LSTM, SimpleRNN
 from keras.layers.wrappers import TimeDistributed
 import argparse
+import twitter as twit
+from configparser import ConfigParser
 from RNN_utils import *
 
-# Parsing arguments for Network definition
-ap = argparse.ArgumentParser()
-ap.add_argument('-data_dir', default='./HG2U.txt')
-ap.add_argument('-batch_size', type=int, default=50)
-ap.add_argument('-layer_num', type=int, default=2)
-ap.add_argument('-seq_length', type=int, default=50)
-ap.add_argument('-hidden_dim', type=int, default=500)
-ap.add_argument('-generate_length', type=int, default=210)
-ap.add_argument('-nb_epoch', type=int, default=20)
-ap.add_argument('-mode', default='train')
-ap.add_argument('-weights', default='')
-args = vars(ap.parse_args())
+config = ConfigParser()
+config.read('DNA_Bot.ini')
 
-DATA_DIR = args['data_dir']
-BATCH_SIZE = args['batch_size']
-HIDDEN_DIM = args['hidden_dim']
-SEQ_LENGTH = args['seq_length']
-WEIGHTS = args['weights']
 
-GENERATE_LENGTH = args['generate_length']
-LAYER_NUM = args['layer_num']
+api = twit.Api(consumer_key= config.get('Twitter_Settings','consumer_key'),
+                      consumer_secret= config.get('Twitter_Settings', 'consumer_secret'),
+                      access_token_key= config.get('Twitter_Settings', 'access_token_key'),
+                      access_token_secret= config.get( 'Twitter_Settings', 'access_token_secret'))
+users = api.GetFriends()
+print([u.name for u in users])
+
+# instantiate
+DATA_DIR = config.get('ML_Settings','data_dir')
+BATCH_SIZE = config.getint('ML_Settings', 'batch_size')
+HIDDEN_DIM = config.getint('ML_Settings','hidden_dim')
+SEQ_LENGTH = config.getint('ML_Settings','seq_length')
+WEIGHTS = config.get('ML_Settings','weights')
+GENERATE_LENGTH = config.getint('ML_Settings','gen_length')
+LAYER_NUM = config.getint('ML_Settings', 'layer_num')
+MODE = config.get('ML_Settings', 'mode')
 
 # Creating training data
 print('Creating Training Data')
@@ -51,8 +52,9 @@ print('network compiled \n')
 
 # Generate some sample before training to know how bad it is!
 print('Gen samp txt')
-sampleText =generate_text(model, args['generate_length'], VOCAB_SIZE, ix_to_char)
-
+sampleText =generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
+status = api.PostUpdate(sampleText)
+print('Posted to twitter :: {}'.format(status.text))
 print('Sample text data from before training!!!!! \n')
 print(sampleText)
 Logger.AddEvent(-1, sampleText)
@@ -67,7 +69,7 @@ else:
 print ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \n \n')
 print ('Training started this is going to take a while \n\n\n')
 # Training if there is no trained weights specified
-if args['mode'] == 'train' or WEIGHTS == '':
+if MODE == 'train' or WEIGHTS == '':
   print('training started!!! This may take a while.')
   while True:
     print('\n\nEpoch: {}\n'.format(nb_epoch))
@@ -77,6 +79,7 @@ if args['mode'] == 'train' or WEIGHTS == '':
     GenText = generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
     print("---------------Generated Text-------------\n")
     print(GenText)
+    status = api.PostUpdate(GenText)
     print('\n -----------------------------------------')
     Logger.AddEvent(nb_epoch, GenText)
     print('NB Epoch {}'.format(nb_epoch))

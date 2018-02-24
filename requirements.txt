@@ -1,7 +1,8 @@
 matplotlib
-numpy
-time 
-csv 
+numpy 
 keras
 argparse
 h5py
+TensorFlow
+python-twitter
+configparser
