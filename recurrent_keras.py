@@ -50,6 +50,13 @@ model.compile(loss="categorical_crossentropy", optimizer="rmsprop")
 Logger = Log()
 print('network compiled \n')
 
+
+if not WEIGHTS == '':
+  model.load_weights(WEIGHTS)
+  nb_epoch = int(WEIGHTS[WEIGHTS.rfind('_') + 1:WEIGHTS.find('.')])
+else:
+  nb_epoch = 0
+
 # Generate some sample before training to know how bad it is!
 print('Gen samp txt')
 sampleText =generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
@@ -59,11 +66,6 @@ print('Sample text data from before training!!!!! \n')
 print(sampleText)
 Logger.AddEvent(-1, sampleText)
 
-if not WEIGHTS == '':
-  model.load_weights(WEIGHTS)
-  nb_epoch = int(WEIGHTS[WEIGHTS.rfind('_') + 1:WEIGHTS.find('.')])
-else:
-  nb_epoch = 0
 
 
 print ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \n \n')
