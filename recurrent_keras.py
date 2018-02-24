@@ -83,8 +83,7 @@ if MODE == 'train' or WEIGHTS == '':
     print('\n -----------------------------------------')
     Logger.AddEvent(nb_epoch, GenText)
     print('NB Epoch {}'.format(nb_epoch))
-    if nb_epoch % 10 == 0:
-      model.save_weights('checkpoint_layer_{}_hidden_{}_epoch_{}.hdf5'.format(LAYER_NUM, HIDDEN_DIM, nb_epoch))
+    model.save_weights('checkpoint_layer_{}_hidden_{}_epoch_{}.hdf5'.format(LAYER_NUM, HIDDEN_DIM, nb_epoch))
 
 # Else, loading the trained weights and performing generation only
 elif WEIGHTS == '':
