@@ -1,0 +1,6 @@
+matplotlib
+numpy
+time 
+csv 
+keras
+argparse
