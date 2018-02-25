@@ -11,17 +11,18 @@ import argparse
 import twitter as twit
 from configparser import ConfigParser
 from RNN_utils import *
+UseTwitter = False 
 
 config = ConfigParser()
 config.read('DNA_Bot.ini')
 
-
-api = twit.Api(consumer_key= config.get('Twitter_Settings','consumer_key'),
-                      consumer_secret= config.get('Twitter_Settings', 'consumer_secret'),
-                      access_token_key= config.get('Twitter_Settings', 'access_token_key'),
-                      access_token_secret= config.get( 'Twitter_Settings', 'access_token_secret'))
-users = api.GetFriends()
-print([u.name for u in users])
+if UseTwitter == True:
+  api = twit.Api(consumer_key= config.get('Twitter_Settings','consumer_key'),
+                        consumer_secret= config.get('Twitter_Settings', 'consumer_secret'),
+                        access_token_key= config.get('Twitter_Settings', 'access_token_key'),
+                        access_token_secret= config.get( 'Twitter_Settings', 'access_token_secret'))
+  users = api.GetFriends()
+  print([u.name for u in users])
 
 # instantiate
 DATA_DIR = config.get('ML_Settings','data_dir')
@@ -81,7 +82,8 @@ if MODE == 'train' or WEIGHTS == '':
     GenText = generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
     print("---------------Generated Text-------------\n")
     print(GenText)
-    status = api.PostUpdate(GenText)
+    if UseTwitter == True:
+      status = api.PostUpdate(GenText)
     print('\n -----------------------------------------')
     Logger.AddEvent(nb_epoch, GenText)
     print('NB Epoch {}'.format(nb_epoch))
