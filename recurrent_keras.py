@@ -11,7 +11,7 @@ import argparse
 import twitter as twit
 from configparser import ConfigParser
 from RNN_utils import *
-UseTwitter = False 
+UseTwitter = True 
 
 config = ConfigParser()
 config.read('DNA_Bot.ini')
@@ -29,6 +29,7 @@ DATA_DIR = config.get('ML_Settings','data_dir')
 BATCH_SIZE = config.getint('ML_Settings', 'batch_size')
 HIDDEN_DIM = config.getint('ML_Settings','hidden_dim')
 SEQ_LENGTH = config.getint('ML_Settings','seq_length')
+EPOCH = config.get('ML_Settings', 'epoch')
 WEIGHTS = config.get('ML_Settings','weights')
 GENERATE_LENGTH = config.getint('ML_Settings','gen_length')
 LAYER_NUM = config.getint('ML_Settings', 'layer_num')
@@ -54,7 +55,8 @@ print('network compiled \n')
 
 if not WEIGHTS == '':
   model.load_weights(WEIGHTS)
-  nb_epoch = int(WEIGHTS[WEIGHTS.rfind('_') + 1:WEIGHTS.find('.')])
+  #nb_epoch = int(WEIGHTS[WEIGHTS.rfind('_') + 1:WEIGHTS.find('.')])
+  nb_epoch = int(EPOCH)
 else:
   nb_epoch = 0
 
@@ -83,6 +85,10 @@ if MODE == 'train' or WEIGHTS == '':
     print("---------------Generated Text-------------\n")
     print(GenText)
     if UseTwitter == True:
+      api = twit.Api(consumer_key= config.get('Twitter_Settings','consumer_key'),
+                      consumer_secret= config.get('Twitter_Settings', 'consumer_secret'),
+                      access_token_key= config.get('Twitter_Settings', 'access_token_key'),
+                      access_token_secret= config.get( 'Twitter_Settings', 'access_token_secret'))
       status = api.PostUpdate(GenText)
     print('\n -----------------------------------------')
     Logger.AddEvent(nb_epoch, GenText)
