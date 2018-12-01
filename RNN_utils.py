@@ -11,7 +11,7 @@ def generate_text(model, length, vocab_size, ix_to_char, char_to_ix):
 	listData = open('./SeedList.txt', 'r')
 	SeedList = listData.readlines()
 	for i in range(len(SeedList)):
-		SeedList[i] = str(SeedList[i]).replace('\n','')
+		SeedList[i] = str(SeedList[i]).replace('\n',' ')
 	#SeedList = ['Ford', 'Aurther', 'Zephod', 'Young', 'Lemurs', 'Apple', 'Whiskey', 'Actually', 'Wode', 'Mongolia', 'ZZ 9 Plural Z Alpha', 'Dirk' ]
 	print("Seed List :: {0}".format(', '.join(map(str, SeedList))))	
 	SeedWord = (SeedList[np.random.randint(len(SeedList)-1)])
