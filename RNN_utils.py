@@ -5,16 +5,27 @@ import datetime as dt_lib
 import csv as lib_csv
 
 # method for generating text
-def generate_text(model, length, vocab_size, ix_to_char):
+def generate_text(model, length, vocab_size, ix_to_char, char_to_ix):
 	# starting with random character
-	ix = [np.random.randint(vocab_size)]
-	y_char = [ix_to_char[ix[-1]]]
-	X = np.zeros((1, length, vocab_size))
+	#ix = [np.random.randint(vocab_size)]
+	
+	SeedList = ['Ford', 'Aurther', 'Zephod', 'Young', 'Lemurs', 'Apple', 'Whiskey', 'Actually', 'Wode', 'Mongolia', 'ZZ 9 Plural Z Alpha', 'Dirk' ]
+	SeedWord = (SeedList[np.random.randint(len(SeedList)-1)])
+	ix = [char_to_ix[c] for c in SeedWord]
+	y_char = []
+	X = np.zeros((1, (length+len(ix)) , vocab_size))
+	for i in range(len(ix)):
+		X[0, i, :][ix[i]] = 1
+		y_char.append(ix_to_char[ix[i]])
+
+	SeedLen = len(ix)
+	#y_char = [ix_to_char[ix[-1]]]
 	for i in range(length):
+		Posn = SeedLen + i 
 		# appending the last predicted character to sequence
-		X[0, i, :][ix[-1]] = 1
+		X[0, Posn, :][ix[-1]] = 1
 		#print(ix_to_char[ix[-1]], end="")
-		ix = np.argmax(model.predict(X[:, :i+1, :])[0], 1)
+		ix = np.argmax(model.predict(X[:, :Posn+1, :])[0], 1)
 		y_char.append(ix_to_char[ix[-1]])
 	return ('').join(y_char)
 
@@ -49,7 +60,7 @@ def load_data(data_dir, seq_length):
 		for j in range(seq_length):
 			target_sequence[j][y_sequence_ix[j]] = 1.
 			y[i] = target_sequence
-	return X, y, VOCAB_SIZE, ix_to_char
+	return X, y, VOCAB_SIZE, ix_to_char, char_to_ix
 
 
 class EventType(object):

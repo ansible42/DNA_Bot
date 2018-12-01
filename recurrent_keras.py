@@ -11,11 +11,12 @@ import argparse
 import twitter as twit
 from configparser import ConfigParser
 from RNN_utils import *
-UseTwitter = True 
+UseTwitter = False 
 
 config = ConfigParser()
 config.read('DNA_Bot.ini')
 
+# Check your twitter connection 
 if UseTwitter == True:
   api = twit.Api(consumer_key= config.get('Twitter_Settings','consumer_key'),
                         consumer_secret= config.get('Twitter_Settings', 'consumer_secret'),
@@ -37,7 +38,7 @@ MODE = config.get('ML_Settings', 'mode')
 
 # Creating training data
 print('Creating Training Data')
-X, y, VOCAB_SIZE, ix_to_char = load_data(DATA_DIR, SEQ_LENGTH)
+X, y, VOCAB_SIZE, ix_to_char, char_to_ix = load_data(DATA_DIR, SEQ_LENGTH)
 
 
 # Creating and compiling the Network
@@ -62,7 +63,7 @@ else:
 
 # Generate some sample before training to know how bad it is!
 print('Gen samp txt')
-sampleText =generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
+sampleText =generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char, char_to_ix)
 #status = api.PostUpdate(sampleText)
 #print('Posted to twitter :: {}'.format(status.text))
 print('Sample text data from before training!!!!! \n')
@@ -75,13 +76,12 @@ print ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \n \n')
 print ('Training started this is going to take a while \n\n\n')
 # Training if there is no trained weights specified
 if MODE == 'train' or WEIGHTS == '':
-  print('training started!!! This may take a while.')
   while True:
     print('\n\nEpoch: {}\n'.format(nb_epoch))
     model.fit(X, y, batch_size=BATCH_SIZE, verbose=1, nb_epoch=1)
     nb_epoch += 1
     print('creating text from epoch {} \n'.format(nb_epoch))
-    GenText = generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
+    GenText = generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char, char_to_ix)
     print("---------------Generated Text-------------\n")
     print(GenText)
     if UseTwitter == True:
@@ -99,7 +99,7 @@ if MODE == 'train' or WEIGHTS == '':
 elif WEIGHTS == '':
   # Loading the trained weights
   model.load_weights(WEIGHTS)
-  generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
+  generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char, char_to_ix)
   print('\n\n')
 else:
   print('\n\nNothing to do!')
